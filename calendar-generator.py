@@ -21,17 +21,24 @@ def add_text(img, text, position, font_size, colour):
     return img
 
 def main():
+    weekday_initials=["M","Tu","W","Th","F","Sat","Sun"]
+
     background_images=get_images()
     background_images_index=0
 
     print(background_images_index)
-    img_arr=[]
-    img=Image.new("RGB", (1980, 1080*2), (255, 255, 255))
-    img.paste(background_images[background_images_index],(0,0))
 
     date:datetime = datetime(2027, 1, 1)
     last_month=1
     week=0
+    
+    img_arr=[]
+    img=Image.new("RGB", (1980, 1080*2), (255, 255, 255))
+    img.paste(background_images[background_images_index],(0,0))
+    img=add_text(img,date.strftime("%B"),(0,img.height/2),128,(0,0,0))
+    for i in range(len(weekday_initials)):
+        img=add_text(img,weekday_initials[i],(i*img.width/7,8*img.height/14),128,(0,0,0))
+    
     while date.year==2027:
         day=date.day
         weekday=date.weekday()
@@ -49,12 +56,16 @@ def main():
             
             img=Image.new("RGB", (1980, 1080*2), (255, 255, 255))
             img.paste(background_images[background_images_index],(0,0))
+            img=add_text(img,date.strftime("%B"),(0,img.height/2),128,(0,0,0))
+            for i in range(len(weekday_initials)):
+                img=add_text(img,weekday_initials[i],(i*img.width/7,8*img.height/14),128,(0,0,0))
 
         if weekday==0:
             week+=1
+
         x=(weekday*img.width)//7
-        y=img.height//2
-        y+=(week)*(img.height//10)
+        y=(8*img.height)//14
+        y+=(week)*(img.height//14)
 
         img=add_text(img,str(day),(x,y),64,(0,0,0))
         date=date+timedelta(days=1)
