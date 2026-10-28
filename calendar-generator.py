@@ -14,10 +14,10 @@ def get_images(folder):
         img_arr.append(img)
     return img_arr
 
-def add_text(img, text, position, font_size, colour):
+def add_text(img, text, position, font_size, colour,anchor="lt"):
     font = ImageFont.truetype("fonts/Aptos-Mono.ttf", font_size)
     draw = ImageDraw.Draw(img)
-    draw.text(position, text, font=font, fill=colour)
+    draw.text(position, text, font=font, fill=colour,anchor=anchor)
     return img
 
 def setup_image(top_images,bottom_images,images_index,date):
@@ -29,13 +29,15 @@ def setup_image(top_images,bottom_images,images_index,date):
     overlay_img=Image.new("RGBA", (1980, 1080*2), (255, 255, 255,255))
     draw = ImageDraw.Draw(overlay_img)
     draw.rectangle((0,1080,1980,1080*2), fill=(255,255,255,64))
+    draw.rectangle((0,8*img.height/16,1980,10*img.height/16), fill=(255,255,255,128))
     img = Image.alpha_composite(img, overlay_img)
 
     img.paste(top_images[images_index],(0,0))
 
     img=add_text(img,date.strftime("%B").upper(),(0,img.height/2),128,(0,0,0))
     for i in range(len(weekday_initials)):
-        img=add_text(img,weekday_initials[i],(i*img.width/7,9*img.height/16),128,(0,0,0))
+        x=i*img.width/7+img.width/14
+        img=add_text(img,weekday_initials[i],(x,9*img.height/16),128,(0,0,0),anchor="mt")
     return img
 
 def main():
@@ -77,8 +79,16 @@ def main():
         y=(10*img.height)//16
         y+=(week)*(img.height//16)
 
-        img=add_text(img,str(day),(x,y),64,(0,0,0))
-        date=date+timedelta(days=1)
+        img=add_text(img,str(day),(x+img.width/14,y+img.height/32),64,(0,0,0),anchor="mt")
+        draw = ImageDraw.Draw(img)
+
+        next_date=date+timedelta(days=1)
+        if day%2==0:
+            draw.rectangle((x,y,x+img.width/7,y+img.height/16),fill=None,outline="white",width=15)
+        else:
+            draw.rectangle((x,y,x+img.width/7,y+img.height/16),fill=None,outline="lightgray",width=15)
+        date=next_date
+
     outfile_name=f"output/({last_month}) {image_names[last_month-1].title()}.png"
     img.save(outfile_name)
     print(f"Saved {outfile_name}")
